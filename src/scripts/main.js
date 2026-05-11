@@ -1,5 +1,4 @@
 'use strict';
-'use strict';
 
 const tHead = document.querySelector('thead');
 const tBody = document.querySelector('tbody');
@@ -113,14 +112,14 @@ form.addEventListener('submit', (e) => {
   const formData = new FormData(e.currentTarget);
   const employeeData = Object.fromEntries(formData.entries());
 
-  if (employeeData.name.length < 4) {
+  if (employeeData.name.trim().length < 4) {
     handleNotification('Print name more than four letters', 'error');
 
     return;
   }
 
-  if (employeeData.position.length < 4) {
-    handleNotification('Print position more than four letters', 'error');
+  if (employeeData.position.trim() === '') {
+    handleNotification('Position must be', 'error');
 
     return;
   }

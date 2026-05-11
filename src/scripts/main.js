@@ -1,6 +1,5 @@
 'use strict';
-// 1. Implement table sorting by clicking on the title (in two directions).
-// write code here
+'use strict';
 
 const tHead = document.querySelector('thead');
 const tBody = document.querySelector('tbody');
@@ -33,14 +32,14 @@ tHead.addEventListener('click', (e) => {
     const maybeNum2 = parseFloat(contentB.replace(/[^0-9.-]+/g, ''));
 
     if (!isNaN(maybeNum) && !isNaN(maybeNum2)) {
-      if (counter % 2 === 0) {
-        return maybeNum2 - maybeNum;
-      } else {
+      if (counter % 2 !== 0) {
         return maybeNum - maybeNum2;
+      } else {
+        return maybeNum2 - maybeNum;
       }
     }
 
-    if (counter % 2 === 0) {
+    if (counter % 2 !== 0) {
       return contentA.localeCompare(contentB);
     } else {
       return contentB.localeCompare(contentA);
@@ -55,12 +54,15 @@ let previusTR = null;
 tBody.addEventListener('click', (e) => {
   const clickedTR = e.target.closest('tr');
 
+  if (!clickedTR) {
+    return;
+  }
+
   if (previusTR) {
     previusTR.classList.remove('active');
   }
 
   clickedTR.classList.add('active');
-
   previusTR = clickedTR;
 });
 
@@ -81,7 +83,7 @@ function addForm() {
     </label>
     <label>Age: <input name="age" type="number" data-qa="age" required></label>
     <label>Salary: <input name="salary" type="number" data-qa="salary" required></label>
-    <button type="submit">Add Employee</button>
+    <button type="submit">Save to table</button>
   </form>
 `;
 
@@ -92,21 +94,7 @@ addForm();
 
 const form = document.querySelector('.new-employee-form');
 
-const handleSuccess = (message) => {
-  const div = document.createElement('div');
-  const h2 = document.createElement('h2');
-
-  h2.textContent = message;
-  h2.classList.add('title');
-  div.appendChild(h2);
-
-  div.setAttribute('data-qa', 'notification');
-  div.classList.add('notification', `success`);
-
-  document.body.appendChild(div);
-};
-
-const handleError = (message) => {
+const handleNotification = (message, type) => {
   const div = document.createElement('div');
   const h2 = document.createElement('h2');
 
@@ -114,7 +102,7 @@ const handleError = (message) => {
   h2.classList.add('title');
   div.appendChild(h2);
   div.setAttribute('data-qa', 'notification');
-  div.classList.add('notification', `error`);
+  div.classList.add('notification', type);
 
   document.body.appendChild(div);
 };
@@ -123,34 +111,36 @@ form.addEventListener('submit', (e) => {
   e.preventDefault();
 
   const formData = new FormData(e.currentTarget);
-
   const employeeData = Object.fromEntries(formData.entries());
+
+  if (employeeData.name.length < 4) {
+    handleNotification('Print name more than four letters', 'error');
+
+    return;
+  }
+
+  if (employeeData.position.length < 4) {
+    handleNotification('Print position more than four letters', 'error');
+
+    return;
+  }
+
+  if (employeeData.age < 18 || employeeData.age > 90) {
+    handleNotification('Print new age', 'error');
+
+    return;
+  }
 
   const salary = Number(employeeData.salary);
   const salaryToSave = '$' + salary.toLocaleString('en-US');
 
-  if (employeeData.name.length < 4) {
-    handleError('Print name more than four letters');
-
-    return null;
-  }
-
-  if (employeeData.age < 18 || employeeData.age > 90) {
-    handleError('Print new age');
-
-    return null;
-  }
-
   const dataToSave = {
-    name: employeeData.name,
-    position: employeeData.position,
-    office: employeeData.office,
-    age: employeeData.age,
+    ...employeeData,
     salary: salaryToSave,
   };
 
   addEmployeeRow(dataToSave);
-  handleSuccess('added new employee');
+  handleNotification('added new employee', 'success');
   form.reset();
 });
 
@@ -161,9 +151,7 @@ function addEmployeeRow(employeeData) {
 
   const row = tBody.insertRow();
 
-  row.insertCell().textContent = employeeData.name;
-  row.insertCell().textContent = employeeData.position;
-  row.insertCell().textContent = employeeData.office;
-  row.insertCell().textContent = employeeData.age;
-  row.insertCell().textContent = employeeData.salary;
+  ['name', 'position', 'office', 'age', 'salary'].forEach((key) => {
+    row.insertCell().textContent = employeeData[key];
+  });
 }

@@ -67,7 +67,7 @@ tBody.addEventListener('click', (e) => {
 
 function addForm() {
   const formHTML = `
-  <form class="new-employee-form">
+  <form novalidate class="new-employee-form" >
     <label>Name: <input name="name" type="text" data-qa="name" required></label>
     <label>Position: <input name="position" type="text" data-qa="position" required></label>
     <label>Office:
@@ -126,6 +126,12 @@ form.addEventListener('submit', (e) => {
 
   if (employeeData.age < 18 || employeeData.age > 90) {
     handleNotification('Print new age', 'error');
+
+    return;
+  }
+
+  if (Number(employeeData.salary) <= 0) {
+    handleNotification('Salary must be', 'error');
 
     return;
   }
